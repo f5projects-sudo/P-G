@@ -963,12 +963,37 @@
 
     revealElements.forEach(el => observer.observe(el));
 
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
+
       const data = new FormData(form);
-      const name = data.get('nombre');
-      formMessage.textContent = `Gracias, ${name}. Hemos recibido su mensaje y nuestro equipo dará seguimiento a la brevedad.`;
-      form.reset();
+      const payload = {
+        nombre: data.get('nombre'),
+        empresa: data.get('empresa'),
+        email: data.get('email'),
+        telefono: data.get('telefono'),
+        mensaje: data.get('mensaje')
+      };
+
+      try {
+        const response = await fetch('https://n8n.automationf5networking.com/webhook/c7fe6f6b-c6e1-47b1-9dfd-27a848509052', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (response.ok) {
+          formMessage.textContent = `Gracias, ${payload.nombre}. Hemos recibido su mensaje y nuestro equipo dará seguimiento a la brevedad.`;
+          form.reset();
+        } else {
+          formMessage.textContent = 'Ocurrió un error al enviar el mensaje. Intente nuevamente.';
+        }
+
+      } catch (error) {
+        formMessage.textContent = 'Error de conexión. Intente más tarde.';
+      }
     });
   </script>
 </body>
